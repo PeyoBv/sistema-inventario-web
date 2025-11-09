@@ -70,18 +70,27 @@ class DataService {
   }
 
   async login(username: string, password: string): Promise<{ token: string; user: User }> {
+    const users = await this.getUsers()
+    console.log(`🔍 Intentando login para: ${username}`)
+    console.log(`📊 Total de usuarios en sistema: ${users.length}`)
+    
     const user = await this.getUserByUsername(username)
     
     if (!user) {
+      console.log(`❌ Usuario '${username}' no encontrado`)
+      console.log('👥 Usuarios disponibles:', users.map(u => u.username).join(', '))
       throw new Error('Credenciales inválidas')
     }
 
+    console.log(`✅ Usuario encontrado: ${user.username} (${user.role})`)
     const isValid = await verifyPassword(password, user.password)
     
     if (!isValid) {
+      console.log(`❌ Contraseña incorrecta para ${username}`)
       throw new Error('Credenciales inválidas')
     }
 
+    console.log(`✅ Login exitoso para ${username}`)
     const token = createToken(user.id, user.username, user.role)
     return { token, user }
   }

@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { dataService } from '@/lib/dataService'
+import { resetDefaultUsers } from '@/lib/initData'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Package, Info } from '@phosphor-icons/react'
+import { Package, Info, ArrowsClockwise } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 export function LoginPage() {
@@ -46,6 +47,22 @@ export function LoginPage() {
     }
   }
 
+  const handleResetCredentials = async () => {
+    setIsLoading(true)
+    try {
+      const success = await resetDefaultUsers()
+      if (success) {
+        toast.success('Credenciales reiniciadas correctamente. Intenta iniciar sesión nuevamente.')
+      } else {
+        toast.error('Error al reiniciar credenciales')
+      }
+    } catch (error) {
+      toast.error('Error al reiniciar credenciales')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
       <Card className="w-full max-w-md">
@@ -75,6 +92,7 @@ export function LoginPage() {
                     size="sm"
                     className="h-6 text-xs"
                     onClick={() => handleQuickLogin('admin', 'admin123')}
+                    disabled={isLoading}
                   >
                     Usar
                   </Button>
@@ -88,6 +106,7 @@ export function LoginPage() {
                     size="sm"
                     className="h-6 text-xs"
                     onClick={() => handleQuickLogin('bodeguero', 'bodega123')}
+                    disabled={isLoading}
                   >
                     Usar
                   </Button>
@@ -101,6 +120,7 @@ export function LoginPage() {
                     size="sm"
                     className="h-6 text-xs"
                     onClick={() => handleQuickLogin('usuario', 'user123')}
+                    disabled={isLoading}
                   >
                     Usar
                   </Button>
@@ -108,6 +128,19 @@ export function LoginPage() {
               </div>
             </AlertDescription>
           </Alert>
+
+          <div className="flex items-center justify-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleResetCredentials}
+              disabled={isLoading}
+              className="text-xs gap-2 text-muted-foreground hover:text-foreground"
+            >
+              <ArrowsClockwise className="h-3 w-3" />
+              Reiniciar credenciales
+            </Button>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">

@@ -14,9 +14,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { MagnifyingGlass, Plus, Pencil, Trash, Package } from '@phosphor-icons/react'
+import { MagnifyingGlass, Plus, Pencil, Trash, Package, FilePdf } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { ItemDialog } from './ItemDialog'
+import { MovementReportDialog } from './MovementReportDialog'
 
 export function InventoryTable() {
   const { hasRole } = useAuth()
@@ -26,9 +27,11 @@ export function InventoryTable() {
   const [isLoading, setIsLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<Item | null>(null)
+  const [reportDialogOpen, setReportDialogOpen] = useState(false)
 
   const canEdit = hasRole(['admin', 'bodeguero'])
   const canDelete = hasRole(['admin'])
+  const canGenerateReports = hasRole(['admin', 'bodeguero'])
 
   useEffect(() => {
     loadData()
@@ -131,6 +134,16 @@ export function InventoryTable() {
                   className="pl-10"
                 />
               </div>
+              {canGenerateReports && (
+                <Button 
+                  onClick={() => setReportDialogOpen(true)}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <FilePdf size={18} weight="fill" />
+                  <span className="hidden md:inline">Reporte PDF</span>
+                </Button>
+              )}
               {canEdit && (
                 <Button onClick={handleAdd} className="gap-2">
                   <Plus size={18} weight="bold" />
@@ -215,6 +228,11 @@ export function InventoryTable() {
           onClose={handleDialogClose}
         />
       )}
+
+      <MovementReportDialog 
+        open={reportDialogOpen}
+        onClose={() => setReportDialogOpen(false)}
+      />
     </>
   )
 }

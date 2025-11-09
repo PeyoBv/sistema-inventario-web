@@ -22,9 +22,10 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { ArrowUp, ArrowDown, Wrench, ClockCounterClockwise } from '@phosphor-icons/react'
+import { ArrowUp, ArrowDown, Wrench, ClockCounterClockwise, FilePdf } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { formatDate, formatMovementType } from '@/lib/auth'
+import { MovementReportDialog } from './MovementReportDialog'
 
 export function WarehouseDashboard() {
   const { user } = useAuth()
@@ -33,6 +34,7 @@ export function WarehouseDashboard() {
   const [selectedItemId, setSelectedItemId] = useState('')
   const [quantity, setQuantity] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
+  const [reportDialogOpen, setReportDialogOpen] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -269,11 +271,23 @@ export function WarehouseDashboard() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ClockCounterClockwise size={24} />
-            Historial de Movimientos
-          </CardTitle>
-          <CardDescription>Últimos movimientos registrados</CardDescription>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <ClockCounterClockwise size={24} />
+                Historial de Movimientos
+              </CardTitle>
+              <CardDescription>Últimos movimientos registrados</CardDescription>
+            </div>
+            <Button 
+              onClick={() => setReportDialogOpen(true)}
+              className="gap-2"
+              variant="outline"
+            >
+              <FilePdf size={18} weight="fill" />
+              Generar Reporte PDF
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {logs.length === 0 ? (
@@ -310,6 +324,11 @@ export function WarehouseDashboard() {
           )}
         </CardContent>
       </Card>
+
+      <MovementReportDialog 
+        open={reportDialogOpen}
+        onClose={() => setReportDialogOpen(false)}
+      />
     </div>
   )
 }

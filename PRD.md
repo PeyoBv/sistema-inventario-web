@@ -57,6 +57,13 @@ A complete inventory management system with role-based access control, item trac
 - **Progression**: Logs table → Filter by date/item/user/type → View details → Export capability
 - **Success criteria**: All movements tracked, sortable/filterable, shows who did what when
 
+### PDF Report Generation
+- **Functionality**: Export inventory movements from the last 6 hours as a formatted PDF document
+- **Purpose**: Enable printable reports for shift handoffs, audits, and record-keeping
+- **Trigger**: Admin or Bodeguero clicks "Generar Reporte PDF" button
+- **Progression**: Click report button → Dialog displays movement summary → Choose Download PDF or Print → PDF generates with header, summary stats, and detailed movement table
+- **Success criteria**: PDF includes timestamp, movement summary (entries/exits/adjustments), complete transaction log with pagination, formatted for printing
+
 ## Edge Case Handling
 
 - **Negative Stock Prevention** - Check-out operations validate sufficient quantity exists before processing
@@ -138,6 +145,9 @@ Animations should be subtle and functional, enhancing the feeling of responsiven
   - Users for user management
   - MagnifyingGlass for search
   - Plus/Pencil/Trash for CRUD operations
+  - FilePdf for PDF report generation
+  - Printer for print functionality
+  - Download for PDF download
 
 - **Spacing**: 
   - Card padding: p-6

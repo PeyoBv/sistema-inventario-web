@@ -4,6 +4,12 @@ import type { User, AuthState } from '@/lib/types'
 import { verifyToken } from '@/lib/auth'
 import { initializeDefaultData } from '@/lib/initData'
 
+declare const spark: {
+  kv: {
+    get: <T>(key: string) => Promise<T | undefined>
+  }
+}
+
 interface AuthContextType {
   user: User | null
   token: string | null
@@ -21,15 +27,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function initialize() {
-      await initializeDefaultData()
-      
-      if (authState?.token) {
-        const tokenData = verifyToken(authState.token)
-        if (!tokenData) {
-          setAuthState({ user: null, token: null })
+      try {
+        await initializeDefaultData()
+        
+        const currentState = await spark.kv.get<AuthState>('auth-state')
+        if (currentState?.token) {
+          const tokenData = verifyToken(currentState.token)
+          if (!tokenData) {
+            setAuthState({ user: null, token: null })
+          }
         }
+      } catch (error) {
+        console.error('Error initializing auth:', error)
+      } finally {
+        setIsReady(true)
       }
-      setIsReady(true)
     }
     
     initialize()
@@ -51,17 +63,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider
       value={{
-        user: authState?.user ?? null,
-        token: authState?.token ?? null,
+        user: authState?.user || null,
+        token: authState?.token || null,
         login,
         logout,
-        isAuthenticated: !!authState?.token && !!authState?.user,
+        isAuthenticated: !!(authState?.token && authState?.user),
         hasRole
       }}
     >
-      {isReady ? children : <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>}
+      {isReady ? children : (
+        <div className="flex items-center justify-center min-h-screen bg-background">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      )}
     </AuthContext.Provider>
   )
 }

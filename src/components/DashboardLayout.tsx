@@ -1,8 +1,9 @@
 import { ReactNode } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTheme } from '@/contexts/ThemeContext'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Package, SignOut, User } from '@phosphor-icons/react'
+import { Package, SignOut, User, Moon, Sun } from '@phosphor-icons/react'
 import { formatRole } from '@/lib/auth'
 import {
   DropdownMenu,
@@ -19,6 +20,7 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, logout } = useAuth()
+  const { theme, toggleTheme } = useTheme()
 
   const getInitials = (username: string) => {
     return username.substring(0, 2).toUpperCase()
@@ -38,38 +40,53 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
           </div>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="gap-2">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                    {user && getInitials(user.username)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="hidden md:block text-left">
-                  <p className="text-sm font-medium">{user?.username}</p>
-                  <p className="text-xs text-muted-foreground">{user && formatRole(user.role)}</p>
-                </div>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem disabled>
-                <User size={16} className="mr-2" />
-                {user?.username}
-              </DropdownMenuItem>
-              <DropdownMenuItem disabled>
-                <span className="mr-2">👤</span>
-                {user && formatRole(user.role)}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive">
-                <SignOut size={16} className="mr-2" />
-                Cerrar Sesión
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="rounded-full"
+            >
+              {theme === 'light' ? (
+                <Moon size={20} />
+              ) : (
+                <Sun size={20} />
+              )}
+            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="gap-2">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                      {user && getInitials(user.username)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="hidden md:block text-left">
+                    <p className="text-sm font-medium">{user?.username}</p>
+                    <p className="text-xs text-muted-foreground">{user && formatRole(user.role)}</p>
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem disabled>
+                  <User size={16} className="mr-2" />
+                  {user?.username}
+                </DropdownMenuItem>
+                <DropdownMenuItem disabled>
+                  <span className="mr-2">👤</span>
+                  {user && formatRole(user.role)}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive">
+                  <SignOut size={16} className="mr-2" />
+                  Cerrar Sesión
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </header>
 

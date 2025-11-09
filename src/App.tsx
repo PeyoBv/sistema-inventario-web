@@ -1,4 +1,5 @@
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
+import { ThemeProvider } from '@/contexts/ThemeContext'
 import { LoginPage } from '@/components/LoginPage'
 import { Dashboard } from '@/components/Dashboard'
 import { Toaster } from '@/components/ui/sonner'
@@ -15,10 +16,12 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-      <Toaster position="top-right" />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AppContent />
+        <Toaster position="top-right" />
+      </AuthProvider>
+    </ThemeProvider>
   )
 }
 

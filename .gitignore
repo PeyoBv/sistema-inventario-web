@@ -25,10 +25,3 @@ dist-ssr
 *.sw?
 
 .env
-**/agent-eval-report*
-packages
-pids
-.file-manifest
-.devcontainer/
-
-.spark-workbench-id

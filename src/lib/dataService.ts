@@ -1,17 +1,10 @@
 import type { User, Item, Location, MovementLog } from '@/lib/types'
 import { generateId, hashPassword, verifyPassword, createToken } from '@/lib/auth'
-
-declare const spark: {
-  kv: {
-    get: <T>(key: string) => Promise<T | undefined>
-    set: <T>(key: string, value: T) => Promise<void>
-    delete: (key: string) => Promise<void>
-  }
-}
+import { storage } from '@/lib/storage'
 
 class DataService {
   async getUsers(): Promise<User[]> {
-    const users = await spark.kv.get<User[]>('users')
+    const users = await storage.get<User[]>('users')
     return users || []
   }
 
@@ -41,7 +34,7 @@ class DataService {
       createdAt: new Date().toISOString()
     }
 
-    await spark.kv.set('users', [...users, newUser])
+    await storage.set('users', [...users, newUser])
     return newUser
   }
 
@@ -59,14 +52,14 @@ class DataService {
 
     const updatedUser = { ...users[index], ...updates }
     users[index] = updatedUser
-    await spark.kv.set('users', users)
+    await storage.set('users', users)
     return updatedUser
   }
 
   async deleteUser(id: string): Promise<void> {
     const users = await this.getUsers()
     const filtered = users.filter(u => u.id !== id)
-    await spark.kv.set('users', filtered)
+    await storage.set('users', filtered)
   }
 
   async login(username: string, password: string): Promise<{ token: string; user: User }> {
@@ -96,7 +89,7 @@ class DataService {
   }
 
   async getItems(): Promise<Item[]> {
-    const items = await spark.kv.get<Item[]>('items')
+    const items = await storage.get<Item[]>('items')
     return items || []
   }
 
@@ -119,7 +112,7 @@ class DataService {
       updatedAt: new Date().toISOString()
     }
 
-    await spark.kv.set('items', [...items, newItem])
+    await storage.set('items', [...items, newItem])
     return newItem
   }
 
@@ -144,18 +137,18 @@ class DataService {
     }
     
     items[index] = updatedItem
-    await spark.kv.set('items', items)
+    await storage.set('items', items)
     return updatedItem
   }
 
   async deleteItem(id: string): Promise<void> {
     const items = await this.getItems()
     const filtered = items.filter(i => i.id !== id)
-    await spark.kv.set('items', filtered)
+    await storage.set('items', filtered)
   }
 
   async getLocations(): Promise<Location[]> {
-    const locations = await spark.kv.get<Location[]>('locations')
+    const locations = await storage.get<Location[]>('locations')
     return locations || []
   }
 
@@ -173,7 +166,7 @@ class DataService {
       createdAt: new Date().toISOString()
     }
 
-    await spark.kv.set('locations', [...locations, newLocation])
+    await storage.set('locations', [...locations, newLocation])
     return newLocation
   }
 
@@ -187,12 +180,12 @@ class DataService {
 
     const updatedLocation = { ...locations[index], ...updates }
     locations[index] = updatedLocation
-    await spark.kv.set('locations', locations)
+    await storage.set('locations', locations)
     return updatedLocation
   }
 
   async getMovementLogs(): Promise<MovementLog[]> {
-    const logs = await spark.kv.get<MovementLog[]>('movement-logs')
+    const logs = await storage.get<MovementLog[]>('movement-logs')
     return logs || []
   }
 
@@ -245,8 +238,8 @@ class DataService {
 
     const logs = await this.getMovementLogs()
     
-    await spark.kv.set('items', items)
-    await spark.kv.set('movement-logs', [...logs, newLog])
+    await storage.set('items', items)
+    await storage.set('movement-logs', [...logs, newLog])
 
     return { item: updatedItem, log: newLog }
   }

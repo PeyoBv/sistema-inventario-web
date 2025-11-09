@@ -1,13 +1,30 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { useKV } from '@github/spark/hooks'
 import type { User, AuthState } from '@/lib/types'
 import { verifyToken } from '@/lib/auth'
 import { initializeDefaultData } from '@/lib/initData'
 
-declare const spark: {
-  kv: {
-    get: <T>(key: string) => Promise<T | undefined>
+function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((prev: T) => T)) => void] {
+  const [storedValue, setStoredValue] = useState<T>(() => {
+    try {
+      const item = window.localStorage.getItem(key)
+      return item ? JSON.parse(item) : initialValue
+    } catch (error) {
+      console.error(error)
+      return initialValue
+    }
+  })
+
+  const setValue = (value: T | ((prev: T) => T)) => {
+    try {
+      const valueToStore = value instanceof Function ? value(storedValue) : value
+      setStoredValue(valueToStore)
+      window.localStorage.setItem(key, JSON.stringify(valueToStore))
+    } catch (error) {
+      console.error(error)
+    }
   }
+
+  return [storedValue, setValue]
 }
 
 interface AuthContextType {
@@ -22,7 +39,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [authState, setAuthState] = useKV<AuthState>('auth-state', { user: null, token: null })
+  const [authState, setAuthState] = useLocalStorage<AuthState>('auth-state', { user: null, token: null })
   const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {
@@ -30,11 +47,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         await initializeDefaultData()
         
-        const currentState = await spark.kv.get<AuthState>('auth-state')
-        if (currentState?.token) {
-          const tokenData = verifyToken(currentState.token)
-          if (!tokenData) {
-            setAuthState({ user: null, token: null })
+        const stored = window.localStorage.getItem('auth-state')
+        if (stored) {
+          const currentState = JSON.parse(stored) as AuthState
+          if (currentState?.token) {
+            const tokenData = verifyToken(currentState.token)
+            if (!tokenData) {
+              setAuthState({ user: null, token: null })
+            }
           }
         }
       } catch (error) {

@@ -40,4 +40,5 @@ El sistema se inicializa automáticamente con los siguientes usuarios:
 
 ## 📄 Licencia
 
-The Spark Template files and resources from GitHub are licensed under the terms of the MIT license, Copyright GitHub, Inc.
+MIT License
+

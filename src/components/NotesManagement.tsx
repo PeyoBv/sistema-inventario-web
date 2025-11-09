@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useKV } from '@github/spark/hooks'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -17,9 +16,33 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
+function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((prev: T) => T)) => void] {
+  const [storedValue, setStoredValue] = useState<T>(() => {
+    try {
+      const item = window.localStorage.getItem(key)
+      return item ? JSON.parse(item) : initialValue
+    } catch (error) {
+      console.error(error)
+      return initialValue
+    }
+  })
+
+  const setValue = (value: T | ((prev: T) => T)) => {
+    try {
+      const valueToStore = value instanceof Function ? value(storedValue) : value
+      setStoredValue(valueToStore)
+      window.localStorage.setItem(key, JSON.stringify(valueToStore))
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  return [storedValue, setValue]
+}
+
 export function NotesManagement() {
   const { user, hasRole } = useAuth()
-  const [notes, setNotes] = useKV<Note[]>('notes', [])
+  const [notes, setNotes] = useLocalStorage<Note[]>('notes', [])
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [selectedNote, setSelectedNote] = useState<Note | null>(null)
   const [isReviewOpen, setIsReviewOpen] = useState(false)

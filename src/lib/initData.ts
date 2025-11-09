@@ -1,12 +1,5 @@
 import { dataService } from './dataService'
-
-declare const spark: {
-  kv: {
-    get: <T>(key: string) => Promise<T | undefined>
-    set: <T>(key: string, value: T) => Promise<void>
-    delete: (key: string) => Promise<void>
-  }
-}
+import { storage } from './storage'
 
 export async function initializeDefaultData() {
   try {
@@ -51,7 +44,7 @@ export async function initializeDefaultData() {
 export async function resetDefaultUsers() {
   try {
     console.log('🔄 Reiniciando usuarios...')
-    await spark.kv.delete('users')
+    await storage.delete('users')
     
     await dataService.createUser('admin', 'admin123', 'admin')
     await dataService.createUser('bodeguero', 'bodega123', 'bodeguero')

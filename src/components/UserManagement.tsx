@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { dataService } from '@/lib/dataService'
+import { useAuth } from '@/contexts/AuthContext'
 import type { User } from '@/lib/types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -12,12 +13,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Users, Plus, Pencil, Trash } from '@phosphor-icons/react'
+import { Users, Plus, Pencil, Trash, ShieldWarning } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { formatRole, formatDate } from '@/lib/auth'
 import { UserDialog } from './UserDialog'
 
 export function UserManagement() {
+  const { user: currentUser } = useAuth()
   const [users, setUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -40,6 +42,27 @@ export function UserManagement() {
   }
 
   const handleDelete = async (id: string) => {
+    // Validación de seguridad 1: No permitir que un admin se elimine a sí mismo
+    if (currentUser?.id === id) {
+      toast.error('No puedes eliminar tu propia cuenta', {
+        description: 'Por seguridad, no es posible eliminar la cuenta con la que estás conectado',
+        icon: <ShieldWarning size={20} />
+      })
+      return
+    }
+
+    // Validación de seguridad 2: No permitir eliminar el último administrador
+    const adminUsers = users.filter(u => u.role === 'admin')
+    const userToDelete = users.find(u => u.id === id)
+    
+    if (userToDelete?.role === 'admin' && adminUsers.length === 1) {
+      toast.error('No se puede eliminar el último administrador', {
+        description: 'Debe haber al menos un administrador en el sistema',
+        icon: <ShieldWarning size={20} />
+      })
+      return
+    }
+
     if (!confirm('¿Está seguro de eliminar este usuario?')) return
 
     try {
@@ -152,6 +175,8 @@ export function UserManagement() {
                             size="sm"
                             onClick={() => handleDelete(user.id)}
                             className="gap-1 text-destructive hover:text-destructive"
+                            disabled={currentUser?.id === user.id}
+                            title={currentUser?.id === user.id ? 'No puedes eliminar tu propia cuenta' : 'Eliminar usuario'}
                           >
                             <Trash size={16} />
                             <span className="hidden sm:inline">Eliminar</span>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { dataService } from '@/lib/dataService'
+import { useAuth } from '@/contexts/AuthContext'
 import type { User } from '@/lib/types'
 import {
   Dialog,
@@ -19,6 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { ShieldWarning } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 interface UserDialogProps {
@@ -28,14 +31,29 @@ interface UserDialogProps {
 }
 
 export function UserDialog({ user, open, onClose }: UserDialogProps) {
+  const { user: currentUser } = useAuth()
   const [formData, setFormData] = useState({
     username: '',
     password: '',
     role: 'usuario' as User['role']
   })
   const [isLoading, setIsLoading] = useState(false)
+  const [allUsers, setAllUsers] = useState<User[]>([])
+
+  // Determinar si es el usuario actual
+  const isCurrentUser = user?.id === currentUser?.id
+  
+  // Determinar si es el último admin
+  const isLastAdmin = user?.role === 'admin' && allUsers.filter(u => u.role === 'admin').length === 1
 
   useEffect(() => {
+    // Cargar todos los usuarios para validaciones
+    const loadUsers = async () => {
+      const users = await dataService.getUsers()
+      setAllUsers(users)
+    }
+    loadUsers()
+
     if (user) {
       setFormData({
         username: user.username,
@@ -57,6 +75,16 @@ export function UserDialog({ user, open, onClose }: UserDialogProps) {
 
     try {
       if (user) {
+        // Validación: No permitir que el último admin cambie su rol
+        if (isLastAdmin && formData.role !== 'admin') {
+          toast.error('No se puede cambiar el rol del último administrador', {
+            description: 'Debe haber al menos un administrador en el sistema',
+            icon: <ShieldWarning size={20} />
+          })
+          setIsLoading(false)
+          return
+        }
+
         const updates: Partial<User> = { role: formData.role }
         if (formData.password) {
           updates.password = formData.password
@@ -91,6 +119,22 @@ export function UserDialog({ user, open, onClose }: UserDialogProps) {
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
+            {isCurrentUser && (
+              <Alert className="bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800">
+                <ShieldWarning className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                <AlertDescription className="text-amber-800 dark:text-amber-200">
+                  Estás editando tu propia cuenta. Ten cuidado al cambiar tu rol.
+                </AlertDescription>
+              </Alert>
+            )}
+            {isLastAdmin && (
+              <Alert className="bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800">
+                <ShieldWarning className="h-4 w-4 text-red-600 dark:text-red-400" />
+                <AlertDescription className="text-red-800 dark:text-red-200">
+                  Este es el último administrador del sistema. No se puede cambiar su rol.
+                </AlertDescription>
+              </Alert>
+            )}
             <div className="space-y-2">
               <Label htmlFor="username">Nombre de Usuario *</Label>
               <Input
@@ -131,6 +175,7 @@ export function UserDialog({ user, open, onClose }: UserDialogProps) {
                 value={formData.role}
                 onValueChange={(value) => setFormData({ ...formData, role: value as User['role'] })}
                 required
+                disabled={isLastAdmin}
               >
                 <SelectTrigger id="role">
                   <SelectValue placeholder="Seleccione un rol" />
@@ -141,6 +186,11 @@ export function UserDialog({ user, open, onClose }: UserDialogProps) {
                   <SelectItem value="usuario">Usuario</SelectItem>
                 </SelectContent>
               </Select>
+              {isLastAdmin && (
+                <p className="text-xs text-red-600 dark:text-red-400">
+                  No se puede cambiar el rol del último administrador
+                </p>
+              )}
             </div>
           </div>
           <DialogFooter>

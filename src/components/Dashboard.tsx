@@ -5,8 +5,9 @@ import { InventoryTable } from './InventoryTable'
 import { WarehouseDashboard } from './WarehouseDashboard'
 import { UserManagement } from './UserManagement'
 import { LocationManagement } from './LocationManagement'
+import { NotesManagement } from './NotesManagement'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Package, ArrowsLeftRight, MapPin, Users } from '@phosphor-icons/react'
+import { Package, ArrowsLeftRight, MapPin, Users, ChatCircle } from '@phosphor-icons/react'
 
 export function Dashboard() {
   const { hasRole } = useAuth()
@@ -18,7 +19,7 @@ export function Dashboard() {
   return (
     <DashboardLayout>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 gap-2 h-auto p-1">
+        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 gap-2 h-auto p-1">
           <TabsTrigger value="inventory" className="gap-2 py-3">
             <Package size={18} />
             <span className="hidden sm:inline">Inventario</span>
@@ -35,6 +36,10 @@ export function Dashboard() {
               <span className="hidden sm:inline">Ubicaciones</span>
             </TabsTrigger>
           )}
+          <TabsTrigger value="notes" className="gap-2 py-3">
+            <ChatCircle size={18} />
+            <span className="hidden sm:inline">Notas</span>
+          </TabsTrigger>
           {isAdmin && (
             <TabsTrigger value="users" className="gap-2 py-3">
               <Users size={18} />
@@ -58,6 +63,10 @@ export function Dashboard() {
             <LocationManagement />
           </TabsContent>
         )}
+
+        <TabsContent value="notes" className="space-y-6">
+          <NotesManagement />
+        </TabsContent>
 
         {isAdmin && (
           <TabsContent value="users" className="space-y-6">

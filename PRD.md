@@ -64,6 +64,13 @@ A complete inventory management system with role-based access control, item trac
 - **Progression**: Click report button → Dialog displays movement summary → Choose Download PDF or Print → PDF generates with header, summary stats, and detailed movement table
 - **Success criteria**: PDF includes timestamp, movement summary (entries/exits/adjustments), complete transaction log with pagination, formatted for printing
 
+### Notes and Warnings System
+- **Functionality**: Users can create notes or warnings for administrators and warehouse staff to review, with status tracking and response capability
+- **Purpose**: Facilitate communication between users and warehouse staff about issues, observations, or alerts
+- **Trigger**: Any user clicks "Nueva Nota" button in Notes section
+- **Progression**: Notes tab → Create note → Select type (note/warning) → Enter title and message → Submit → Appears in list → Admin/Bodeguero reviews → Updates status (reviewed/resolved) → Adds response
+- **Success criteria**: Notes persist across sessions, filterable by status and type, warnings highlighted visually, only creator or admin can delete, admin/bodeguero can review and respond
+
 ## Edge Case Handling
 
 - **Negative Stock Prevention** - Check-out operations validate sufficient quantity exists before processing
@@ -73,6 +80,8 @@ A complete inventory management system with role-based access control, item trac
 - **Session Expiration** - Auto-logout after token expiry with redirect to login and preserved navigation intent
 - **Missing Data** - Graceful empty states for new installations with quick-start prompts
 - **Role Escalation** - All sensitive operations double-check user permissions server-side (KV context)
+- **Note Deletion** - Only note creators or administrators can delete notes to prevent unauthorized removal
+- **Unreviewed Warnings** - Warning badges visually distinguish pending warnings that need immediate attention
 
 ## Design Direction
 
@@ -148,6 +157,11 @@ Animations should be subtle and functional, enhancing the feeling of responsiven
   - FilePdf for PDF report generation
   - Printer for print functionality
   - Download for PDF download
+  - ChatCircle for notes and communication
+  - Warning for warning alerts
+  - NotePencil for notes
+  - CheckCircle for resolved status
+  - Clock for pending status
 
 - **Spacing**: 
   - Card padding: p-6

@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { useKV } from '@github/spark/hooks'
 import type { User, AuthState } from '@/lib/types'
 import { verifyToken } from '@/lib/auth'
+import { initializeDefaultData } from '@/lib/initData'
 
 interface AuthContextType {
   user: User | null
@@ -19,13 +20,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {
-    if (authState?.token) {
-      const tokenData = verifyToken(authState.token)
-      if (!tokenData) {
-        setAuthState({ user: null, token: null })
+    async function initialize() {
+      await initializeDefaultData()
+      
+      if (authState?.token) {
+        const tokenData = verifyToken(authState.token)
+        if (!tokenData) {
+          setAuthState({ user: null, token: null })
+        }
       }
+      setIsReady(true)
     }
-    setIsReady(true)
+    
+    initialize()
   }, [])
 
   const login = (token: string, user: User) => {

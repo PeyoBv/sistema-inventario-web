@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Package } from '@phosphor-icons/react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Package, Info } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 export function LoginPage() {
@@ -29,6 +30,22 @@ export function LoginPage() {
     }
   }
 
+  const handleQuickLogin = async (user: string, pass: string) => {
+    setUsername(user)
+    setPassword(pass)
+    setIsLoading(true)
+
+    try {
+      const { token, user: userData } = await dataService.login(user, pass)
+      login(token, userData)
+      toast.success('Inicio de sesión exitoso')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Error al iniciar sesión')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
       <Card className="w-full max-w-md">
@@ -43,7 +60,55 @@ export function LoginPage() {
             <CardDescription>Ingrese sus credenciales para continuar</CardDescription>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          <Alert className="bg-accent/10 border-accent/30">
+            <Info className="h-4 w-4 text-accent" />
+            <AlertDescription className="text-sm space-y-2">
+              <p className="font-medium text-foreground">Credenciales de demostración:</p>
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-between items-center gap-2">
+                  <span>
+                    <strong>Admin:</strong> admin / admin123
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-6 text-xs"
+                    onClick={() => handleQuickLogin('admin', 'admin123')}
+                  >
+                    Usar
+                  </Button>
+                </div>
+                <div className="flex justify-between items-center gap-2">
+                  <span>
+                    <strong>Bodeguero:</strong> bodeguero / bodega123
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-6 text-xs"
+                    onClick={() => handleQuickLogin('bodeguero', 'bodega123')}
+                  >
+                    Usar
+                  </Button>
+                </div>
+                <div className="flex justify-between items-center gap-2">
+                  <span>
+                    <strong>Usuario:</strong> usuario / user123
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-6 text-xs"
+                    onClick={() => handleQuickLogin('usuario', 'user123')}
+                  >
+                    Usar
+                  </Button>
+                </div>
+              </div>
+            </AlertDescription>
+          </Alert>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="username">Usuario</Label>

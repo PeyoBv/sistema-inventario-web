@@ -1,5 +1,7 @@
 # ✨ Sistema de Inventario
 
+- URL de prueba : https://sistema-inventario-web-ten.vercel.app/
+
 Sistema completo de gestión de inventario con control de acceso basado en roles, seguimiento de artículos, gestión de ubicaciones y registro completo de movimientos para operaciones de almacén.
 
 ## � Características
